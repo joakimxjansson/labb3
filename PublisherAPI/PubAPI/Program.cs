@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PubAPI;
 using PublisherData;
+using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,6 +14,9 @@ builder.Services.AddDbContext<PubContext>(
        opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("PubConnection"))
        .EnableSensitiveDataLogging()
        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+builder.Services.ConfigureHttpJsonOptions(options => {
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 var app = builder.Build();
 
@@ -42,6 +48,10 @@ app.MapGet("/weatherforecast", () =>
 .WithOpenApi();
 
 app.MapAuthorEndpoints();
+
+app.MapBookEndpoints();
+app.MapArtistEndpoints();
+app.MapCoverEndpoints();
 
 app.Run();
 
